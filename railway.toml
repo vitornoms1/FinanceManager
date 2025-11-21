@@ -1,13 +1,12 @@
 [build]
-# Diz para usar o construtor padrão
+# O comando entra na pasta da API e instala tudo lá
 builder = "NIXPACKS"
-# O comando de construção: Entra na pasta da API e instala tudo
 buildCommand = "cd finance-manager-api && npm install"
 
 [deploy]
-# O comando de início: Entra na pasta da API e roda o start
-startCommand = "cd finance-manager-api && npm start"
+# O comando entra na pasta e inicia o servidor manualmente
+startCommand = "cd finance-manager-api && node server.js"
 
 [nixpacks]
-# Garante que o ambiente tenha Node.js instalado
-pkgs = ["nodejs"]
+# ISSO É O SEGREDO: Força o Railway a nos tratar como Node.js, não como site estático
+plan = "nodejs"
