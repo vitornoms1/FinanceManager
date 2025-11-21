@@ -1,8 +1,7 @@
-// src/api/axios.js
 import axios from 'axios';
 
 const api = axios.create({
-  // Seu backend está rodando na porta 3000
+  // Tem que ter HTTPS e NÃO pode ter barra no final
   baseURL: 'https://finance-manager-production.up.railway.app', 
 });
 
