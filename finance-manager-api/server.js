@@ -33,7 +33,7 @@ const verifyToken = (req, res, next) => {
 
 // --- ROTA DE TESTE (Pública) ---
 app.get('/', (req, res) => {
-  res.send('API Finance Manager rodando! 🚀');
+  res.send('API Finance Manager ATUALIZADA COM LOGIN! 🚀');
 });
 
 // ============================================
