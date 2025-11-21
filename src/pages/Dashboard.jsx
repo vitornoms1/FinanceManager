@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 
 function Dashboard() {
   const { logout } = useAuth();
-  const API_URL = "http://localhost:3000";
+  const API_URL = "financemanager.railway.internal";
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
