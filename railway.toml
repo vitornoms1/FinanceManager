@@ -1,0 +1,13 @@
+[build]
+# Diz para usar o construtor padrão
+builder = "NIXPACKS"
+# O comando de construção: Entra na pasta da API e instala tudo
+buildCommand = "cd finance-manager-api && npm install"
+
+[deploy]
+# O comando de início: Entra na pasta da API e roda o start
+startCommand = "cd finance-manager-api && npm start"
+
+[nixpacks]
+# Garante que o ambiente tenha Node.js instalado
+pkgs = ["nodejs"]
