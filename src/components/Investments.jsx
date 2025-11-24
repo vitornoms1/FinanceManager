@@ -9,7 +9,7 @@ function Investments({ investments, onAddInvestment, onDeleteInvestment, onEditI
   
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(''); // O estado continua existindo para guardar a data na edição
+  const [date, setDate] = useState('');
   
   const [editingId, setEditingId] = useState(null);
 
@@ -19,7 +19,6 @@ function Investments({ investments, onAddInvestment, onDeleteInvestment, onEditI
     setEditingId(inv.id);
     setDescription(inv.description);
     setAmount(inv.amount.toString());
-    // Guardamos a data original no estado para não perdê-la ao salvar
     setDate(inv.date ? inv.date.substring(0, 10) : '');
   };
 
@@ -34,21 +33,17 @@ function Investments({ investments, onAddInvestment, onDeleteInvestment, onEditI
     e.preventDefault();
     const amountValue = parseFloat(amount);
 
-    // Validação: Não precisamos mais checar se 'date' está preenchido
     if (!description || !amountValue || amountValue <= 0) {
       alert(t.alertFillFields);
       return;
     }
 
-    // LÓGICA DA DATA AUTOMÁTICA
-    // Se estiver editando, usa a data antiga (guardada no state).
-    // Se for novo, gera a data de hoje (YYYY-MM-DD).
     const finalDate = editingId ? date : new Date().toISOString().split('T')[0];
 
     const investmentData = {
       description,
       amount: amountValue,
-      date: finalDate // Envia a data automática ou preservada
+      date: finalDate
     };
 
     if (editingId) {
@@ -89,7 +84,6 @@ function Investments({ investments, onAddInvestment, onDeleteInvestment, onEditI
           </button>
         )}
 
-        {/* Linha Única: Descrição e Valor (Data foi removida da UI) */}
         <div className="flex gap-2">
           <input 
             type="text" value={description} onChange={(e) => setDescription(e.target.value)}
@@ -129,7 +123,6 @@ function Investments({ investments, onAddInvestment, onDeleteInvestment, onEditI
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-gray-700">{item.description}</span>
-                  {/* A Data continua aparecendo na lista para consulta */}
                   <span className="text-xs text-gray-400">
                     {item.date ? new Date(item.date).toLocaleDateString(undefined, { timeZone: 'UTC' }) : ''}
                   </span>

@@ -1,16 +1,12 @@
-// src/App.jsx
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext'; // Importa o AuthProvider
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
-// Nomes limpos para as páginas
-import Login from './pages/LoginPage.jsx';        // (Vamos criar a seguir)
-import Register from './pages/RegisterPage.jsx';  // (Vamos criar a seguir)
+import Login from './pages/LoginPage.jsx';
+import Register from './pages/RegisterPage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 
-// Componente que protege a rota (Só entra se estiver logado)
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, authLoading } = useAuth(); 
   
@@ -27,16 +23,17 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    // Envolvemos tudo no AuthProvider para ter acesso ao contexto de usuário
     <AuthProvider>
       <Router>
-        <Toaster position="top-right" />
+        <Toaster 
+           position="top-right"
+           reverseOrder={false} 
+        />
+        
         <Routes>
-          {/* Rotas Públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* Rota Protegida: O Dashboard */}
           <Route 
             path="/" 
             element={
@@ -46,7 +43,6 @@ function App() {
             } 
           />
 
-          {/* Redireciona qualquer erro para a home */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>

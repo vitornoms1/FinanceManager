@@ -1,5 +1,3 @@
-// src/components/FinanceChart.jsx
-
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -8,43 +6,29 @@ import { useLanguage } from '../context/LanguageContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// Recebemos selectedMonth e selectedYear agora
 function FinanceChart({ income, expenses, bills, investments = [], selectedMonth, selectedYear }) {
   const { t, formatCurrency } = useLanguage();
 
-  // 1. Soma Gastos Variáveis (Já vêm filtrados do App.jsx)
   const totalVariableExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
   
-  // 2. Soma Contas Fixas (NOVA LÓGICA)
   const totalMonthlyBills = bills.reduce((acc, bill) => {
-    // Se nunca foi paga, não desconta do saldo
     if (!bill.lastPaymentDate) return acc;
 
-    // Verifica se o pagamento foi feito no Mês e Ano selecionados
-    // A data vem como 'YYYY-MM-DD' (string)
     const [pYear, pMonth] = bill.lastPaymentDate.split('-');
     
-    // pMonth é "01", "02"... selectedMonth é 0, 1...
     const paymentMonthIndex = parseInt(pMonth) - 1;
     const paymentYear = parseInt(pYear);
 
     if (paymentMonthIndex === selectedMonth && paymentYear === selectedYear) {
-      // Se foi paga neste mês, calcula o valor da parcela e soma
       const monthlyCost = bill.totalAmount / bill.totalInstallments;
       return acc + monthlyCost;
     }
 
-    // Se não foi paga neste mês, ignora
     return acc;
   }, 0);
 
-  // 3. Soma Investimentos (Mantivemos global, ou quer filtrar por mês também?)
-  // Se quiser que investimentos só descontem se feitos no mês, precisaria ter data no investimento.
-  // Por enquanto, vou deixar como estava (Global), mas podemos mudar.
   const totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
 
-  // Nota: Investimentos geralmente são "saídas" do caixa, mas aumentam o patrimônio.
-  // Se você quer que o saldo reflita "Dinheiro na conta corrente", subtrair investimentos está certo.
   
   const totalSpending = Math.abs(totalVariableExpenses) + totalMonthlyBills + totalInvested;
   const remainingBalance = income - totalSpending;

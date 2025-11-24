@@ -1,5 +1,3 @@
-// src/components/Expenses.jsx
-
 import React, { useState } from 'react';
 import { HiUpload, HiTrash, HiOutlineDocumentText, HiPencil, HiX } from 'react-icons/hi';
 import { useLanguage } from '../context/LanguageContext';
@@ -42,7 +40,6 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
   };
 
   const handleSubmit = (e) => {
-    // Se o evento existir (veio do click ou do enter), previne o reload
     if (e) e.preventDefault();
 
     const amountValue = parseFloat(amount);
@@ -69,7 +66,6 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
     setDescription(''); setAmount(''); setDate(''); setCategory('');
   };
 
-  // --- FUNÇÃO NOVA PARA FORÇAR O ENTER ---
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSubmit(e);
@@ -95,7 +91,7 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
           <input 
             type="text" value={description} 
             onChange={(e) => setDescription(e.target.value)}
-            onKeyDown={handleKeyDown} // <-- ADICIONADO AQUI
+            onKeyDown={handleKeyDown}
             placeholder={t.descPlaceholder} 
             className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
           />
@@ -107,7 +103,7 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
             <input 
               type="number" step="0.01" value={amount} 
               onChange={(e) => setAmount(e.target.value)}
-              onKeyDown={handleKeyDown} // <-- ADICIONADO AQUI
+              onKeyDown={handleKeyDown}
               placeholder="0.00" 
               className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
             />
@@ -118,7 +114,6 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
             <select 
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
-              // Dropdowns geralmente não precisam do onKeyDown, mas pode adicionar se quiser
               className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors bg-white"
             >
               <option value="" disabled>{t.selectCategory}</option>
@@ -133,7 +128,7 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
           <label className="block text-xs text-gray-500 mb-1">{t.dateLabel}</label>
           <input 
             type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            onKeyDown={handleKeyDown} // <-- ADICIONADO AQUI
+            onKeyDown={handleKeyDown}
             className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
           />
         </div>

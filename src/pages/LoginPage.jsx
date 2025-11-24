@@ -1,11 +1,11 @@
-// src/pages/Login.jsx
+// src/pages/LoginPage.jsx
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
-// Importa o contexto de idioma
 import { useLanguage } from '../context/LanguageContext';
+import toast from 'react-hot-toast'; // Importação do Toast
 
 const EyeIcon = ({ onClick, isVisible }) => (
   <button 
@@ -22,8 +22,7 @@ const EyeIcon = ({ onClick, isVisible }) => (
 );
 
 const Login = () => {
-  // Hooks
-  const { t, toggleLanguage, language } = useLanguage(); // Hook de idioma
+  const { t, toggleLanguage, language } = useLanguage(); 
   const { login, authLoading, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -41,15 +40,16 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
+      toast.success("Login realizado com sucesso! 🎉");
     } catch (err) {
       console.error("Erro no login:", err);
+      toast.error("Email ou senha incorretos.");
     }
   };
 
   return (
     <div className="min-h-screen flex relative">
       
-      {/* Botões de Idioma Flutuantes (Topo Direito) */}
       <div className="absolute top-4 right-4 z-50 flex gap-1 bg-white/80 backdrop-blur p-1 rounded-lg border border-gray-200 shadow-sm">
         <button 
           onClick={() => toggleLanguage('pt')}
@@ -65,7 +65,6 @@ const Login = () => {
         </button>
       </div>
 
-      {/* Lado do Formulário */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100 p-8">
         <div className="w-full max-w-md bg-white p-10 rounded-xl shadow-lg">
           <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
@@ -103,7 +102,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Lado da Imagem */}
       <div className="hidden md:flex w-1/2 bg-green-900 flex-col items-center justify-center text-white p-12">
         <h2 className="text-4xl font-bold mb-4 text-center">{t.loginTitle}</h2>
         <p className="text-green-200 text-lg text-center max-w-md">{t.loginSubtitle}</p>

@@ -11,7 +11,8 @@ import { useAuth } from '../context/AuthContext';
 
 function Dashboard() {
   const { logout } = useAuth();
-  const API_URL = "https://finance-manager-production.up.railway.app";
+  
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
@@ -166,17 +167,14 @@ function Dashboard() {
     } catch (error) { console.error("Erro ao editar investimento:", error); }
   };
 
-  // --- PATCH (PAGAR CONTA - ATUALIZADO) ---
+  // --- PATCH (PAGAR CONTA) ---
   const payBillInstallment = async (id) => {
     try {
-      // 1. Cria a data referente ao mês/ano SELECIONADOS
-      // Usamos dia 10 para evitar problemas de fuso horário
       const paymentDate = new Date(selectedYear, selectedMonth, 10);
 
       const res = await fetch(`${API_URL}/bills/${id}/pay`, { 
         method: 'PATCH',
         headers: getAuthHeaders(),
-        // 2. Envia essa data para o servidor
         body: JSON.stringify({ date: paymentDate.toISOString() })
       });
       
@@ -273,7 +271,6 @@ function Dashboard() {
 
           {/* Coluna 3 */}
           <div className="col-span-1 flex flex-col gap-6 h-auto lg:h-full lg:min-h-0 lg:overflow-hidden">
-            {/* MUDANÇA AQUI: Passamos selectedMonth e selectedYear */}
             <Bills 
               bills={bills} 
               onAddBill={addBill} 

@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -26,7 +25,7 @@ const verifyToken = (req, res, next) => {
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ msg: 'Token inválido.' });
-    req.userId = decoded.id; // Aqui pegamos o ID do usuário logado!
+    req.userId = decoded.id;
     next();
   });
 };
@@ -36,9 +35,6 @@ app.get('/', (req, res) => {
   res.send('API Finance Manager ATUALIZADA COM LOGIN! 🚀');
 });
 
-// ============================================
-// 0. ROTAS DE AUTENTICAÇÃO (PÚBLICAS)
-// ============================================
 
 app.post('/auth/register', (req, res) => {
   const { name, email, password } = req.body;
@@ -73,12 +69,9 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-// ============================================
-// 🔒 ROTAS PROTEGIDAS (DADOS)
-// ============================================
-// Tudo abaixo desta linha exige Token e filtra por ID do usuário
 
-app.use(verifyToken); // Aplica a proteção globalmente daqui pra baixo
+
+app.use(verifyToken);
 
 // Rota /auth/me
 app.get('/auth/me', (req, res) => {
@@ -92,7 +85,6 @@ app.get('/auth/me', (req, res) => {
 // --- GASTOS (EXPENSES) ---
 
 app.get('/expenses', (req, res) => {
-  // Filtra pelo req.userId
   const sql = "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC";
   db.query(sql, [req.userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -102,7 +94,6 @@ app.get('/expenses', (req, res) => {
 
 app.post('/expenses', (req, res) => {
   const { description, amount, date, category } = req.body;
-  // Insere com o req.userId
   const sql = "INSERT INTO expenses (description, amount, date, category, user_id) VALUES (?, ?, ?, ?, ?)";
   db.query(sql, [description, amount, date, category, req.userId], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -112,7 +103,6 @@ app.post('/expenses', (req, res) => {
 
 app.delete('/expenses/:id', (req, res) => {
   const { id } = req.params;
-  // Garante que só deleta se o ID for do usuário
   db.query("DELETE FROM expenses WHERE id = ? AND user_id = ?", [id, req.userId], (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: "Gasto deletado" });
@@ -122,7 +112,6 @@ app.delete('/expenses/:id', (req, res) => {
 app.put('/expenses/:id', (req, res) => {
   const { id } = req.params;
   const { description, amount, date, category } = req.body;
-  // Garante que só edita se for do usuário
   const sql = "UPDATE expenses SET description = ?, amount = ?, date = ?, category = ? WHERE id = ? AND user_id = ?";
   db.query(sql, [description, amount, date, category, id, req.userId], (err) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -143,9 +132,7 @@ app.get('/incomes', (req, res) => {
 
 app.post('/incomes', (req, res) => {
   const { amount, month, year } = req.body;
-  // Remove anterior deste usuário
   const deleteSql = "DELETE FROM incomes WHERE month = ? AND year = ? AND user_id = ?";
-  // Insere nova com user_id
   const insertSql = "INSERT INTO incomes (amount, month, year, user_id) VALUES (?, ?, ?, ?)";
 
   db.query(deleteSql, [month, year, req.userId], (err) => {
@@ -204,7 +191,6 @@ app.put('/bills/:id', (req, res) => {
 
 app.patch('/bills/:id/pay', (req, res) => {
   const { id } = req.params;
-  // Recebemos a data que o usuário selecionou no frontend (ou usa hoje como fallback)
   const { date } = req.body; 
   
   db.query("SELECT * FROM bills WHERE id = ?", [id], (err, results) => {
@@ -217,13 +203,10 @@ app.patch('/bills/:id/pay', (req, res) => {
       return res.status(400).json({ message: "Esta conta já está quitada!" });
     }
 
-    // TRAVA DE SEGURANÇA INTELIGENTE
-    // Compara a data do último pagamento com a data que estamos tentando pagar agora
     const paymentDate = new Date(date || new Date());
     
     if (bill.last_payment_date) {
       const lastPay = new Date(bill.last_payment_date);
-      // Se o pagamento anterior foi no mesmo mês e ano da data que estamos tentando pagar...
       if (lastPay.getUTCMonth() === paymentDate.getUTCMonth() && 
           lastPay.getUTCFullYear() === paymentDate.getUTCFullYear()) {
         return res.status(400).json({ message: "Você já pagou a parcela referente a este mês!" });
@@ -231,7 +214,6 @@ app.patch('/bills/:id/pay', (req, res) => {
     }
 
     const newPaid = bill.paid_installments + 1;
-    // Salva a data que veio do frontend (YYYY-MM-DD)
     const dateString = paymentDate.toISOString().split('T')[0];
 
     const sqlUpdate = "UPDATE bills SET paid_installments = ?, last_payment_date = ? WHERE id = ?";
@@ -261,7 +243,6 @@ app.get('/investments', (req, res) => {
 });
 
 app.post('/investments', (req, res) => {
-  // Recebe 'date'
   const { description, amount, date } = req.body;
   const sql = "INSERT INTO investments (description, amount, date, user_id) VALUES (?, ?, ?, ?)";
   
@@ -281,7 +262,6 @@ app.delete('/investments/:id', (req, res) => {
 
 app.put('/investments/:id', (req, res) => {
   const { id } = req.params;
-  // Recebe 'date'
   const { description, amount, date } = req.body;
   const sql = "UPDATE investments SET description = ?, amount = ?, date = ? WHERE id = ? AND user_id = ?";
   
@@ -292,7 +272,6 @@ app.put('/investments/:id', (req, res) => {
 });
 
 
-// ============================================
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor API rodando na porta ${PORT}`);
 });

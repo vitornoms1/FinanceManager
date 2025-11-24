@@ -1,13 +1,12 @@
-// finance-manager-api/db.js
 require('dotenv').config();
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-  host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
-  user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
-  password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || 'SuaSenhaLocal',
-  database: process.env.MYSQL_DATABASE || process.env.DB_NAME || 'finance_db',
-  port: process.env.MYSQLPORT || process.env.DB_PORT || 3306 // <--- Verifique se não está 3307 fixo aqui!
+  host: process.env.MYSQLHOST || 'localhost',
+  user: process.env.MYSQLUSER || 'root',
+  password: process.env.MYSQLPASSWORD || '',
+  database: process.env.MYSQLDATABASE || 'finance_db',
+  port: process.env.MYSQLPORT || 3307
 });
 
 db.connect((err) => {
@@ -15,7 +14,7 @@ db.connect((err) => {
     console.error('❌ Erro ao conectar:', err.message);
     return;
   }
-  console.log(`✅ Conectado ao MySQL na porta ${db.config.port}!`);
+  console.log(`✅ Conectado ao MySQL (Porta ${db.config.port})! Banco: ${db.config.database}`);
 });
 
 module.exports = db;

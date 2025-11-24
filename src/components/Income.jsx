@@ -1,8 +1,5 @@
-// src/components/Income.jsx
-
 import React, { useState } from 'react';
 import { HiDownload } from 'react-icons/hi';
-// Importamos o hook de idioma
 import { useLanguage } from '../context/LanguageContext';
 
 function Income({ onSetIncome }) {
@@ -18,10 +15,8 @@ function Income({ onSetIncome }) {
       return;
     }
     
-    // Envia o valor para o App/API
     onSetIncome(incomeValue);
 
-    // MUDANÇA AQUI: Limpa o campo após confirmar
     setAmount('');
   };
 

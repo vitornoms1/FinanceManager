@@ -1,11 +1,9 @@
-// src/pages/Register.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
-// Importa o contexto de idioma
 import { useLanguage } from '../context/LanguageContext';
+import toast from 'react-hot-toast';
 
 const EyeIcon = ({ onClick, isVisible }) => (
   <button 
@@ -22,7 +20,7 @@ const EyeIcon = ({ onClick, isVisible }) => (
 );
 
 const Register = () => {
-  const { t, toggleLanguage, language } = useLanguage(); // Hook de idioma
+  const { t, toggleLanguage, language } = useLanguage();
   const { register, authLoading, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -41,20 +39,25 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (password.length < 6) {
-      setPassError(t.passLengthError);
+      setPassError(t.passLengthError || "Senha muito curta");
       return;
     }
     if (password !== confirmPassword) {
-      setPassError(t.passMatchError);
+      setPassError(t.passMatchError || "Senhas não conferem");
       return;
     }
     setPassError('');
 
     try {
       await register(name, email, password);
+      // Mensagem de Sucesso
+      toast.success("Conta criada com sucesso! 🚀");
     } catch (err) {
       console.error("Erro no registro:", err);
+      // Mensagem de Erro
+      toast.error("Erro ao criar conta. Verifique os dados.");
     }
   };
 
@@ -63,7 +66,6 @@ const Register = () => {
   return (
     <div className="min-h-screen flex relative">
       
-      {/* Botões de Idioma Flutuantes */}
       <div className="absolute top-4 right-4 z-50 flex gap-1 bg-white/80 backdrop-blur p-1 rounded-lg border border-gray-200 shadow-sm">
         <button 
           onClick={() => toggleLanguage('pt')}
@@ -79,7 +81,6 @@ const Register = () => {
         </button>
       </div>
 
-      {/* Lado do Formulário */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100 p-8">
         <div className="w-full max-w-md bg-white p-10 rounded-xl shadow-lg">
           <div className="text-center mb-8">
@@ -110,6 +111,7 @@ const Register = () => {
             </InputField>
             
             {passError && <p className="text-red-500 text-sm mb-4">{passError}</p>}
+            
             {error && <p className="text-red-500 text-center mb-4 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
             <button type="submit" disabled={authLoading} className="w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 disabled:bg-gray-400 mt-2">
@@ -126,7 +128,6 @@ const Register = () => {
         </div>
       </div>
       
-      {/* Lado da Imagem */}
       <div className="hidden md:flex w-1/2 bg-green-900 flex-col items-center justify-center text-white p-12">
         <h2 className="text-4xl font-bold mb-4 text-center">{t.registerTitle}</h2>
         <p className="text-green-200 text-center text-lg max-w-md">{t.registerSubtitle}</p>

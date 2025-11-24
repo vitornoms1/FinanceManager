@@ -1,10 +1,7 @@
-// src/components/Bills.jsx
-
 import React, { useState } from 'react';
 import { HiCollection, HiTrash, HiOutlineDocumentText, HiPencil, HiX, HiCheck } from 'react-icons/hi';
 import { useLanguage } from '../context/LanguageContext';
 
-// Recebemos selectedMonth e selectedYear agora
 function Bills({ bills, onAddBill, onDeleteBill, onEditBill, onPayInstallment, selectedMonth, selectedYear }) {
   const { t, formatCurrency } = useLanguage();
   
@@ -117,12 +114,9 @@ function Bills({ bills, onAddBill, onDeleteBill, onEditBill, onPayInstallment, s
               
               const isFinished = bill.paidInstallments >= bill.totalInstallments;
 
-              // --- VERIFICAÇÃO VISUAL ATUALIZADA ---
-              // Agora comparamos com selectedMonth/Year que vieram das props, e não com "Hoje"
               let isPaidInSelectedMonth = false;
               if (bill.lastPaymentDate) {
                 const [pYear, pMonth] = bill.lastPaymentDate.split('-');
-                // Ajusta index do mês (pMonth é '01'..12, selected é 0..11)
                 if (parseInt(pYear) === selectedYear && (parseInt(pMonth) - 1) === selectedMonth) {
                   isPaidInSelectedMonth = true;
                 }
@@ -141,11 +135,9 @@ function Bills({ bills, onAddBill, onDeleteBill, onEditBill, onPayInstallment, s
                     </span>
                     <div className="flex gap-2">
                       
-                      {/* Botão de Pagar Parcela */}
                       {!isFinished && (
                         <button 
                           onClick={() => onPayInstallment(bill.id)}
-                          // Bloqueia se já pagou NESTE MÊS SELECIONADO
                           disabled={isPaidInSelectedMonth}
                           className={`transition-colors p-1 rounded-full 
                             ${isPaidInSelectedMonth 

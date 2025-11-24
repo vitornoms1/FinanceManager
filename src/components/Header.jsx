@@ -20,7 +20,6 @@ function Header({ selectedMonth, setSelectedMonth, selectedYear, setSelectedYear
   return (
     <div className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
       
-      {/* ESQUERDA: Texto de Boas-vindas */}
       <div className="flex flex-col w-full md:w-auto items-center md:items-start text-center md:text-left">
         <h2 className="text-2xl font-bold text-green-700 leading-tight whitespace-nowrap">
           {t.welcome}, <span className="text-gray-800">{firstName}</span>
@@ -28,7 +27,6 @@ function Header({ selectedMonth, setSelectedMonth, selectedYear, setSelectedYear
         <span className="text-xs text-gray-400 font-medium tracking-wide">Finance Manager</span>
       </div>
 
-      {/* CENTRO: Controles de Data */}
       <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-sm">
         
         <div className="flex items-center gap-2">
@@ -57,7 +55,6 @@ function Header({ selectedMonth, setSelectedMonth, selectedYear, setSelectedYear
         </div>
       </div>
 
-      {/* DIREITA: Idioma e Logout */}
       <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
         {/* Idiomas */}
         <div className="flex gap-1 bg-gray-100 p-1 rounded-lg shrink-0 border border-gray-200">
@@ -75,11 +72,10 @@ function Header({ selectedMonth, setSelectedMonth, selectedYear, setSelectedYear
           </button>
         </div>
 
-        {/* Botão de Logout (Apenas Ícone) */}
         <button 
           onClick={logout}
           className="flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 p-2 rounded-lg transition-all border border-red-100 shadow-sm shrink-0"
-          title={t.logoutBtn} // O texto aparece aqui ao passar o mouse
+          title={t.logoutBtn}
         >
           <HiLogout className="text-xl" />
         </button>

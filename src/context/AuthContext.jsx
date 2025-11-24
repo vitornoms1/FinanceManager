@@ -1,5 +1,3 @@
-// src/context/AuthContext.jsx
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../api/axios';
 
@@ -21,7 +19,6 @@ export function AuthProvider({ children }) {
       if (token) {
         try {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          // Vamos criar essa rota '/auth/me' no backend depois
           const response = await api.get('/auth/me'); 
           setUser(response.data);
         } catch (err) {
@@ -41,7 +38,6 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      // Vamos criar essa rota '/auth/login' no backend depois
       const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
@@ -61,7 +57,6 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      // Vamos criar essa rota '/auth/register' no backend depois
       const response = await api.post('/auth/register', { name, email, password });
       const { token, user } = response.data;
 
