@@ -9,11 +9,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_fallback';
 
+// --- CORREÇÃO DE CORS ---
+// Agora aceitamos explicitamente o seu site no Vercel e o Localhost
 app.use(cors({
-  origin: '*',
+  origin: [
+    "https://finance-manager-alpha-livid.vercel.app", // Seu link de produção
+    "http://localhost:5173", // Seu teste local
+    "http://localhost:3000"
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
 app.use(express.json());
 
 // --- MIDDLEWARE DE AUTENTICAÇÃO ---
@@ -25,28 +33,37 @@ const verifyToken = (req, res, next) => {
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ msg: 'Token inválido.' });
-    req.userId = decoded.id;
+    req.userId = decoded.id; 
     next();
   });
 };
 
-// --- ROTA DE TESTE (Pública) ---
+// --- ROTA DE TESTE (Para ver se o servidor está vivo) ---
 app.get('/', (req, res) => {
-  res.send('API Finance Manager ATUALIZADA COM LOGIN! 🚀');
+  res.send('API Finance Manager ONLINE! 🚀');
 });
 
+// ============================================
+// 0. ROTAS DE AUTENTICAÇÃO (PÚBLICAS)
+// ============================================
 
 app.post('/auth/register', (req, res) => {
   const { name, email, password } = req.body;
   db.query("SELECT email FROM users WHERE email = ?", [email], async (err, results) => {
-    if (err) return res.status(500).json({ msg: "Erro no servidor." });
+    if (err) {
+        console.error("Erro no banco:", err); // Log para ajudar no debug
+        return res.status(500).json({ msg: "Erro no servidor ao verificar email." });
+    }
     if (results.length > 0) return res.status(400).json({ msg: "Email já em uso." });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
     
     db.query(sql, [name, email, hashedPassword], (err, result) => {
-      if (err) return res.status(500).json({ msg: "Erro ao salvar." });
+      if (err) {
+          console.error("Erro ao inserir:", err);
+          return res.status(500).json({ msg: "Erro ao salvar usuário." });
+      }
       const userId = result.insertId;
       const token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '7d' });
       res.json({ token, user: { id: userId, name, email } });
@@ -69,11 +86,12 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
+// ============================================
+// 🔒 ROTAS PROTEGIDAS (DADOS)
+// ============================================
 
+app.use(verifyToken); 
 
-app.use(verifyToken);
-
-// Rota /auth/me
 app.get('/auth/me', (req, res) => {
   db.query("SELECT id, name, email FROM users WHERE id = ?", [req.userId], (err, results) => {
     if (err) return res.status(500).json({ msg: "Erro." });
@@ -270,7 +288,6 @@ app.put('/investments/:id', (req, res) => {
     res.json({ id: Number(id), description, amount, date });
   });
 });
-
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor API rodando na porta ${PORT}`);
