@@ -12,13 +12,12 @@ const db = mysql.createPool({
   queueLimit: 0
 });
 
-// Teste de conexão ao iniciar (apenas para log)
 db.getConnection((err, connection) => {
   if (err) {
     console.error('❌ Falha ao conectar no Banco de Dados:', err.code);
-    console.error('⚠️  Verifique se as variáveis MYSQLHOST e MYSQLPASSWORD estão certas no Railway.');
+    console.error('⚠️  Se estiver rodando localmente, não use o endereço "mysql.railway.internal". Use "localhost".');
   } else {
-    console.log(`✅ Conectado ao MySQL com sucesso! Banco: ${process.env.MYSQLDATABASE || 'finance_db'}`);
+    console.log(`✅ Conectado ao MySQL via Pool! Banco: ${process.env.MYSQLDATABASE || 'finance_db'}`);
     connection.release();
   }
 });

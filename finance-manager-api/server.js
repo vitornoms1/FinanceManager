@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
+const db = require('./db'); // Agora usa o Pool do db.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_fallback';
 
 // ======================================================
-// 1. CONFIGURAÇÃO DE SEGURANÇA (CORS)
+// CONFIGURAÇÃO DE SEGURANÇA (CORS)
 // ======================================================
 const allowedOrigins = [
   "https://finance-manager-alpha-livid.vercel.app", 
@@ -22,16 +22,15 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permite conexões sem origem (mobile, postman)
+    // Permite requisições sem origem (como mobile apps ou postman)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.log("Aviso CORS (Origem não listada):", origin);
-      // Em caso de emergência, descomente a linha abaixo para liberar tudo:
-      // callback(null, true); 
-      callback(null, true); // Liberado temporariamente para garantir o funcionamento
+      console.log("Origem não listada no CORS (Liberado temporariamente):", origin);
+      // Mantemos liberado para evitar bloqueios durante o debug
+      callback(null, true);
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -41,94 +40,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// ======================================================
-// 2. ROTA DE INSTALAÇÃO DO BANCO (CRUCIAL PARA O RAILWAY)
-// ======================================================
-// Acesse essa rota pelo navegador uma vez para criar as tabelas
-app.get('/install', (req, res) => {
-  const tableQueries = [
-    // Tabela Users
-    `CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-    // Tabela Expenses
-    `CREATE TABLE IF NOT EXISTS expenses (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      description VARCHAR(255) NOT NULL,
-      amount DECIMAL(10, 2) NOT NULL,
-      category VARCHAR(50),
-      date DATE NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )`,
-    // Tabela Incomes
-    `CREATE TABLE IF NOT EXISTS incomes (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      amount DECIMAL(10, 2) NOT NULL,
-      month INT NOT NULL,
-      year INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )`,
-    // Tabela Bills
-    `CREATE TABLE IF NOT EXISTS bills (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      description VARCHAR(255) NOT NULL,
-      total_amount DECIMAL(10, 2) NOT NULL,
-      total_installments INT NOT NULL,
-      paid_installments INT DEFAULT 0,
-      last_payment_date DATE,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )`,
-    // Tabela Investments
-    `CREATE TABLE IF NOT EXISTS investments (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      description VARCHAR(255) NOT NULL,
-      amount DECIMAL(10, 2) NOT NULL,
-      date DATE NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )`
-  ];
-
-  let successCount = 0;
-  let errors = [];
-
-  // Executa as queries em sequência
-  tableQueries.forEach((query, index) => {
-    db.query(query, (err) => {
-      if (err) {
-        console.error(`Erro ao criar tabela ${index + 1}:`, err);
-        errors.push(err.message);
-      } else {
-        successCount++;
-      }
-      
-      // Se for a última query, responde ao navegador
-      if (index === tableQueries.length - 1) {
-        if (errors.length > 0) {
-           res.status(500).json({ message: "Erros na instalação", errors });
-        } else {
-           res.send(`✅ SUCESSO! ${successCount} tabelas verificadas/criadas. O banco está pronto! Tente criar a conta agora.`);
-        }
-      }
-    });
-  });
-});
-
-// ======================================================
-// 3. MIDDLEWARES E ROTAS BASE
-// ======================================================
-
+// --- MIDDLEWARE DE AUTENTICAÇÃO ---
 const verifyToken = (req, res, next) => {
   const tokenHeader = req.headers['authorization'];
   if (!tokenHeader) return res.status(403).json({ msg: 'Token não fornecido.' });
@@ -142,13 +54,14 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// --- ROTA DE TESTE (PING) ---
 app.get('/', (req, res) => {
-  res.send('API Finance Manager ONLINE! Acesse /install para configurar o banco se necessário.');
+  res.send('API Finance Manager ONLINE! 🚀');
 });
 
-// ======================================================
-// 4. AUTENTICAÇÃO
-// ======================================================
+// ============================================
+// 0. ROTAS DE AUTENTICAÇÃO (PÚBLICAS)
+// ============================================
 
 app.post('/auth/register', (req, res) => {
   const { name, email, password } = req.body;
@@ -161,10 +74,11 @@ app.post('/auth/register', (req, res) => {
     }
     if (results.length > 0) return res.status(400).json({ msg: "Email já em uso." });
 
-    // Hash da senha e inserção
+    // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
     const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
     
+    // Insere usuário
     db.query(sql, [name, email, hashedPassword], (err, result) => {
       if (err) {
           console.error("Erro Banco (Register Insert):", err);
@@ -192,12 +106,13 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-// ======================================================
-// 5. ROTAS PROTEGIDAS
-// ======================================================
+// ============================================
+// 🔒 ROTAS PROTEGIDAS (DADOS)
+// ============================================
 
 app.use(verifyToken); 
 
+// Rota /auth/me
 app.get('/auth/me', (req, res) => {
   db.query("SELECT id, name, email FROM users WHERE id = ?", [req.userId], (err, results) => {
     if (err) return res.status(500).json({ msg: "Erro." });
@@ -256,7 +171,9 @@ app.get('/incomes', (req, res) => {
 
 app.post('/incomes', (req, res) => {
   const { amount, month, year } = req.body;
+  // Remove anterior deste usuário
   const deleteSql = "DELETE FROM incomes WHERE month = ? AND year = ? AND user_id = ?";
+  // Insere nova
   const insertSql = "INSERT INTO incomes (amount, month, year, user_id) VALUES (?, ?, ?, ?)";
 
   db.query(deleteSql, [month, year, req.userId], (err) => {
