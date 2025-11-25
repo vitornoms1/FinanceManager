@@ -1,11 +1,9 @@
-// src/pages/LoginPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
 import { useLanguage } from '../context/LanguageContext';
-import toast from 'react-hot-toast'; // Importação do Toast
+import toast from 'react-hot-toast';
 
 const EyeIcon = ({ onClick, isVisible }) => (
   <button 
@@ -40,11 +38,17 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      toast.success("Login realizado com sucesso! 🎉");
+      toast.success(language === 'pt' ? 'Login realizado com sucesso! 🎉' : 'Login successful! 🎉');
     } catch (err) {
       console.error("Erro no login:", err);
-      toast.error("Email ou senha incorretos.");
+      toast.error(language === 'pt' ? 'Email ou senha incorretos.' : 'Invalid email or password.');
     }
+  };
+
+  const fillDemo = () => {
+    setEmail('admin@demo.com');
+    setPassword('123456');
+    toast('Dados de demonstração preenchidos!', { icon: '👨‍💻' });
   };
 
   return (
@@ -67,9 +71,26 @@ const Login = () => {
 
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100 p-8">
         <div className="w-full max-w-md bg-white p-10 rounded-xl shadow-lg">
-          <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">
             Finance Manager<span className="text-green-600">.</span>
           </h1>
+
+          <div 
+            onClick={fillDemo}
+            className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800 cursor-pointer hover:bg-blue-100 transition-colors"
+          >
+            <div className="flex items-center justify-center gap-2 font-bold mb-1">
+              <span>👋</span>
+              <span>{language === 'pt' ? 'Acesso de Visitante' : 'Visitor Access'}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 text-xs sm:text-sm">
+              <p>Email: <span className="font-mono font-bold">admin@demo.com</span></p>
+              <p>Pass: <span className="font-mono font-bold">123456</span></p>
+            </div>
+            <p className="text-center text-[10px] mt-2 opacity-70 uppercase tracking-wider">
+              {language === 'pt' ? '(Clique para preencher)' : '(Click to auto-fill)'}
+            </p>
+          </div>
           
           <form onSubmit={handleSubmit}>
             <InputField 
