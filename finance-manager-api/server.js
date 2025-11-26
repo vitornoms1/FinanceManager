@@ -129,64 +129,6 @@ app.get('/install', (req, res) => {
   });
 });
 
-app.get('/reset-demo', (req, res) => {
-  const demoEmail = 'admin@demo.com';
-  const demoPass = '123456';
-
-  // 1. Achar ou Criar usuário demo
-  db.query("SELECT id FROM users WHERE email = ?", [demoEmail], async (err, results) => {
-    if (err) return res.status(500).send("Erro Banco: " + err.message);
-    
-    let userId;
-    if (results.length === 0) {
-      const hashedPassword = await bcrypt.hash(demoPass, 10);
-      db.query("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", ['Admin Demo', demoEmail, hashedPassword], (err, result) => {
-        if (err) return res.status(500).send("Erro criar demo: " + err.message);
-        resetData(result.insertId, res);
-      });
-    } else {
-      resetData(results[0].id, res);
-    }
-  });
-
-  function resetData(userId, res) {
-    const deleteQueries = [
-      "DELETE FROM expenses WHERE user_id = ?",
-      "DELETE FROM incomes WHERE user_id = ?",
-      "DELETE FROM bills WHERE user_id = ?",
-      "DELETE FROM investments WHERE user_id = ?"
-    ];
-
-    let dels = 0;
-    deleteQueries.forEach(q => db.query(q, [userId], () => {
-        dels++;
-        if(dels === 4) insertData();
-    }));
-
-    function insertData() {
-      const today = new Date().toISOString().split('T')[0];
-      const insertQueries = [
-        `INSERT INTO incomes (amount, month, year, user_id) VALUES (5000.00, ${new Date().getMonth()}, ${new Date().getFullYear()}, ${userId})`,
-        `INSERT INTO expenses (description, amount, date, category, user_id) VALUES 
-          ('Supermercado Mensal', 850.50, '${today}', 'Alimentação', ${userId}),
-          ('Uber Trabalho', 24.90, '${today}', 'Transporte', ${userId}),
-          ('Jantar com Amigos', 150.00, '${today}', 'Lazer', ${userId})`,
-        `INSERT INTO bills (description, total_amount, total_installments, paid_installments, user_id) VALUES 
-          ('Notebook Gamer', 4500.00, 10, 2, ${userId}),
-          ('Curso Inglês', 1200.00, 12, 5, ${userId})`,
-        `INSERT INTO investments (description, amount, date, user_id) VALUES 
-          ('Reserva Emergência', 2000.00, '${today}', ${userId}),
-          ('Bitcoin', 500.00, '${today}', ${userId})`
-      ];
-
-      let ins = 0;
-      insertQueries.forEach(q => db.query(q, (err) => {
-        ins++;
-        if(ins === insertQueries.length) res.send(`✅ Conta Demo (admin@demo.com) foi resetada e populada com sucesso!`);
-      }));
-    }
-  }
-});
 
 
 
