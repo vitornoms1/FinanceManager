@@ -14,14 +14,12 @@ const mockApi = {
   get: async (url) => {
     console.log(`[Demo Mode] GET: ${url}`);
     const currentData = getLocalData();
+
     if (url.includes('/incomes')) {
       const params = new URLSearchParams(url.split('?')[1]);
       const month = parseInt(params.get('month'));
       const year = parseInt(params.get('year'));
-      
-      const foundIncome = (currentData.incomes || []).find(
-        i => i.month === month && i.year === year
-      );
+      const foundIncome = (currentData.incomes || []).find(i => i.month === month && i.year === year);
       return { data: foundIncome || { amount: 0 } };
     }
 
@@ -40,15 +38,9 @@ const mockApi = {
     }
 
     if (url === '/incomes') {
-      const index = (currentData.incomes || []).findIndex(
-        i => i.month === data.month && i.year === data.year
-      );
-
-      if (index !== -1) {
-        currentData.incomes[index].amount = data.amount;
-      } else {
-        currentData.incomes = [...(currentData.incomes || []), { ...data, id: Date.now() }];
-      }
+      const index = (currentData.incomes || []).findIndex(i => i.month === data.month && i.year === data.year);
+      if (index !== -1) { currentData.incomes[index].amount = data.amount; } 
+      else { currentData.incomes = [...(currentData.incomes || []), { ...data, id: Date.now() }]; }
       saveLocalData(currentData);
       return { data };
     }
@@ -72,8 +64,16 @@ const mockApi = {
         currentData.bills[billIndex].paid_installments += 1;
         currentData.bills[billIndex].last_payment_date = new Date().toISOString().split('T')[0];
         saveLocalData(currentData);
+        
         const b = currentData.bills[billIndex];
-        return { data: { ...b, totalAmount: b.total_amount, totalInstallments: b.total_installments, paidInstallments: b.paid_installments, lastPaymentDate: b.last_payment_date } };
+        return { data: { 
+          id: b.id,
+          description: b.description,
+          totalAmount: Number(b.total_amount || b.totalAmount),
+          totalInstallments: Number(b.total_installments || b.totalInstallments),
+          paidInstallments: Number(b.paid_installments || b.paidInstallments),
+          lastPaymentDate: b.last_payment_date
+        }};
       }
     }
     return { data: {} };
@@ -89,10 +89,7 @@ const mockApi = {
     return { data: { success: true } };
   },
   
-  put: async (url, data) => {
-    console.log(`[Demo Mode] PUT: ${url}`);
-    return { data };
-  }
+  put: async (url, data) => { return { data }; }
 };
 
 const api = isDemoMode ? mockApi : realApi;

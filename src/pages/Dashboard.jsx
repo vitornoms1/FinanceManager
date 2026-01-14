@@ -34,19 +34,18 @@ function Dashboard() {
   const fetchExpenses = async () => {
     try {
       const res = await api.get('/expenses');
-      const data = res.data;
-      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
-      setExpenses(formattedData);
+      setExpenses(res.data.map(item => ({ ...item, amount: Number(item.amount) })));
     } catch (error) { console.error("Erro ao buscar gastos:", error); }
   };
 
   const fetchBills = async () => {
     try {
       const res = await api.get('/bills');
-      const data = res.data;
-      const formattedData = data.map(item => ({
+      const formattedData = res.data.map(item => ({
         ...item,
-        totalAmount: Number(item.totalAmount),
+        totalAmount: Number(item.totalAmount || item.total_amount || 0),
+        totalInstallments: Number(item.totalInstallments || item.total_installments || 0),
+        paidInstallments: Number(item.paidInstallments || item.paid_installments || 0),
         lastPaymentDate: item.lastPaymentDate
       }));
       setBills(formattedData);
@@ -56,17 +55,14 @@ function Dashboard() {
   const fetchInvestments = async () => {
     try {
       const res = await api.get('/investments');
-      const data = res.data;
-      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
-      setInvestments(formattedData);
+      setInvestments(res.data.map(item => ({ ...item, amount: Number(item.amount) })));
     } catch (error) { console.error("Erro ao buscar investimentos:", error); }
   };
 
   const fetchIncome = async () => {
     try {
       const res = await api.get(`/incomes?month=${selectedMonth}&year=${selectedYear}`);
-      const data = res.data;
-      setIncome(Number(data.amount || 0));
+      setIncome(Number(res.data.amount || 0));
     } catch (error) { console.error("Erro ao buscar renda:", error); }
   };
 
@@ -125,15 +121,14 @@ function Dashboard() {
   const payBillInstallment = async (id) => {
     try {
       const paymentDate = new Date(selectedYear, selectedMonth, 10);
-      // Alterado para api.patch para que o mockApi reconheça a função no deploy
       const res = await api.patch(`/bills/${id}/pay`, { date: paymentDate.toISOString() });
       
       const updatedBill = res.data;
       const formattedBill = { 
         ...updatedBill, 
-        totalAmount: Number(updatedBill.totalAmount),
-        totalInstallments: Number(updatedBill.totalInstallments),
-        paidInstallments: Number(updatedBill.paidInstallments),
+        totalAmount: Number(updatedBill.totalAmount || updatedBill.total_amount || 0),
+        totalInstallments: Number(updatedBill.totalInstallments || updatedBill.total_installments || 0),
+        paidInstallments: Number(updatedBill.paidInstallments || updatedBill.paid_installments || 0),
         lastPaymentDate: updatedBill.lastPaymentDate
       };
       setBills(prev => prev.map(item => item.id === id ? formattedBill : item));
@@ -179,36 +174,18 @@ function Dashboard() {
     <div className="bg-slate-100 min-h-screen w-full flex flex-col">
       <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-
           <div className="col-span-1 flex flex-col gap-6">
             <Header selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
             <Income onSetIncome={handleSetIncome} />
-            <Investments 
-              investments={investments} onAddInvestment={addInvestment} onDeleteInvestment={deleteInvestment} onEditInvestment={editInvestment}
-            />
+            <Investments investments={investments} onAddInvestment={addInvestment} onDeleteInvestment={deleteInvestment} onEditInvestment={editInvestment} />
           </div>
-
           <div className="col-span-1 flex flex-col gap-6">
-            <FinanceChart 
-              income={income} expenses={filteredExpenses} bills={bills} investments={filteredInvestments} selectedMonth={selectedMonth} selectedYear={selectedYear} 
-            />
-            <Expenses 
-              expenses={filteredExpenses} onAddExpense={addExpense} onDeleteExpense={deleteExpense} onEditExpense={editExpense} 
-            />
+            <FinanceChart income={income} expenses={filteredExpenses} bills={bills} investments={filteredInvestments} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <Expenses expenses={filteredExpenses} onAddExpense={addExpense} onDeleteExpense={deleteExpense} onEditExpense={editExpense} />
           </div>
-
           <div className="col-span-1 flex flex-col gap-6">
-            <Bills 
-              bills={bills} 
-              onAddBill={addBill} 
-              onDeleteBill={deleteBill} 
-              onEditBill={editBill} 
-              onPayInstallment={payBillInstallment}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-            />
+            <Bills bills={bills} onAddBill={addBill} onDeleteBill={deleteBill} onEditBill={editBill} onPayInstallment={payBillInstallment} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </div>
-
         </div>
       </div>
     </div>
