@@ -9,6 +9,18 @@
 
 A complete personal financial management system built with a modern Full-Stack architecture. It features multi-user support, real-time dashboard, internationalization, and persistent data storage.
 
+---
+
+## 🚀 Live Demo / Demonstração Online
+
+**[Link do seu Deploy na Vercel aqui]**
+
+> **Note:** To ensure 24/7 availability without database costs, the live demo uses **LocalStorage**. Your data is saved locally in your browser. The full MySQL integration is available for local setup.
+>
+> **Nota:** Para garantir disponibilidade 24/7 sem custos de banco de dados, a demo online utiliza **LocalStorage**. Seus dados ficam salvos localmente no seu navegador. A integração completa com MySQL está disponível para configuração local.
+
+---
+
 ### 📸 Screenshots
 
 <div align="center">

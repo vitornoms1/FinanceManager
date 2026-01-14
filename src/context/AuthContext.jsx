@@ -18,13 +18,18 @@ export function AuthProvider({ children }) {
       
       if (token) {
         try {
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          if (token !== 'mock-token-recrutador') {
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          }
+          
           const response = await api.get('/auth/me'); 
           setUser(response.data);
         } catch (err) {
           console.error("Token inválido ou expirado.");
           localStorage.removeItem('token');
-          delete api.defaults.headers.common['Authorization'];
+          if (api.defaults.headers.common['Authorization']) {
+            delete api.defaults.headers.common['Authorization'];
+          }
           setUser(null);
         }
       }
@@ -42,7 +47,11 @@ export function AuthProvider({ children }) {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      if (token !== 'mock-token-recrutador') {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+      
       setUser(user);
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Credenciais inválidas.';
@@ -61,7 +70,9 @@ export function AuthProvider({ children }) {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      if (token !== 'mock-token-recrutador') {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
       setUser(user);
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Erro ao registrar.';
@@ -75,7 +86,9 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
+    if (api.defaults.headers.common['Authorization']) {
+        delete api.defaults.headers.common['Authorization'];
+    }
   };
 
   const value = {
