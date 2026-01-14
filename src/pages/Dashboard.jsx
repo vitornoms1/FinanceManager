@@ -1,5 +1,3 @@
-// src/pages/Dashboard.jsx
-
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Income from '../components/Income';
@@ -8,12 +6,11 @@ import Expenses from '../components/Expenses';
 import Bills from '../components/Bills';
 import Investments from '../components/Investments';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios'; 
 
 function Dashboard() {
   const { logout } = useAuth();
   
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
@@ -22,14 +19,6 @@ function Dashboard() {
   const [expenses, setExpenses] = useState([]); 
   const [bills, setBills] = useState([]); 
   const [investments, setInvestments] = useState([]);
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  };
 
   useEffect(() => {
     fetchExpenses();
@@ -44,20 +33,16 @@ function Dashboard() {
   // --- GET ---
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(`${API_URL}/expenses`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Falha ao buscar");
-      const data = await res.json();
-      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
+      const res = await api.get('/expenses');
+      const formattedData = res.data.map(item => ({ ...item, amount: Number(item.amount) }));
       setExpenses(formattedData);
     } catch (error) { console.error("Erro ao buscar gastos:", error); }
   };
 
   const fetchBills = async () => {
     try {
-      const res = await fetch(`${API_URL}/bills`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Falha ao buscar");
-      const data = await res.json();
-      const formattedData = data.map(item => ({
+      const res = await api.get('/bills');
+      const formattedData = res.data.map(item => ({
         ...item,
         totalAmount: Number(item.totalAmount),
         lastPaymentDate: item.lastPaymentDate
@@ -68,67 +53,45 @@ function Dashboard() {
 
   const fetchInvestments = async () => {
     try {
-      const res = await fetch(`${API_URL}/investments`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Falha ao buscar");
-      const data = await res.json();
-      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
+      const res = await api.get('/investments');
+      const formattedData = res.data.map(item => ({ ...item, amount: Number(item.amount) }));
       setInvestments(formattedData);
     } catch (error) { console.error("Erro ao buscar investimentos:", error); }
   };
 
   const fetchIncome = async () => {
     try {
-      const res = await fetch(`${API_URL}/incomes?month=${selectedMonth}&year=${selectedYear}`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Falha ao buscar");
-      const data = await res.json();
-      setIncome(Number(data.amount || 0));
+      // Passando os parâmetros de mês e ano para a API
+      const res = await api.get(`/incomes?month=${selectedMonth}&year=${selectedYear}`);
+      setIncome(Number(res.data.amount || 0));
     } catch (error) { console.error("Erro ao buscar renda:", error); }
   };
 
   // --- POST ---
   const handleSetIncome = async (newAmount) => {
     try {
-      await fetch(`${API_URL}/incomes`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ amount: newAmount, month: selectedMonth, year: selectedYear })
-      });
+      await api.post('/incomes', { amount: newAmount, month: selectedMonth, year: selectedYear });
       setIncome(newAmount); 
     } catch (error) { console.error("Erro ao salvar renda:", error); }
   };
 
   const addExpense = async (newExpense) => {
     try {
-      const res = await fetch(`${API_URL}/expenses`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(newExpense)
-      });
-      if (!res.ok) throw new Error("Falha ao salvar");
+      await api.post('/expenses', newExpense);
       await fetchExpenses(); 
     } catch (error) { console.error("Erro ao salvar gasto:", error); }
   };
 
   const addBill = async (newBill) => {
     try {
-      const res = await fetch(`${API_URL}/bills`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(newBill)
-      });
-      if (!res.ok) throw new Error("Falha ao salvar");
+      await api.post('/bills', newBill);
       await fetchBills();
     } catch (error) { console.error("Erro ao salvar conta:", error); }
   };
 
   const addInvestment = async (newInv) => {
     try {
-      const res = await fetch(`${API_URL}/investments`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(newInv)
-      });
-      if (!res.ok) throw new Error("Falha ao salvar");
+      await api.post('/investments', newInv);
       await fetchInvestments();
     } catch (error) { console.error("Erro ao salvar investimento:", error); }
   };
@@ -136,33 +99,21 @@ function Dashboard() {
   // --- PUT ---
   const editExpense = async (updatedExpense) => {
     try {
-      await fetch(`${API_URL}/expenses/${updatedExpense.id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updatedExpense)
-      });
+      await api.put(`/expenses/${updatedExpense.id}`, updatedExpense);
       setExpenses(prev => prev.map(item => item.id === updatedExpense.id ? updatedExpense : item));
     } catch (error) { console.error("Erro ao editar gasto:", error); }
   };
 
   const editBill = async (updatedBill) => {
     try {
-      await fetch(`${API_URL}/bills/${updatedBill.id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updatedBill)
-      });
+      await api.put(`/bills/${updatedBill.id}`, updatedBill);
       setBills(prev => prev.map(item => item.id === updatedBill.id ? updatedBill : item));
     } catch (error) { console.error("Erro ao editar conta:", error); }
   };
 
   const editInvestment = async (updatedInv) => {
     try {
-      await fetch(`${API_URL}/investments/${updatedInv.id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updatedInv)
-      });
+      await api.put(`/investments/${updatedInv.id}`, updatedInv);
       setInvestments(prev => prev.map(item => item.id === updatedInv.id ? updatedInv : item));
     } catch (error) { console.error("Erro ao editar investimento:", error); }
   };
@@ -171,19 +122,9 @@ function Dashboard() {
   const payBillInstallment = async (id) => {
     try {
       const paymentDate = new Date(selectedYear, selectedMonth, 10);
-
-      const res = await fetch(`${API_URL}/bills/${id}/pay`, { 
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ date: paymentDate.toISOString() })
-      });
+      const res = await api.patch(`/bills/${id}/pay`, { date: paymentDate.toISOString() });
       
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.message || "Erro ao pagar.");
-        return;
-      }
-      const updatedBill = await res.json();
+      const updatedBill = res.data;
       const formattedBill = { 
         ...updatedBill, 
         totalAmount: Number(updatedBill.totalAmount),
@@ -198,35 +139,25 @@ function Dashboard() {
   // --- DELETE ---
   const deleteExpense = async (id) => {
     try {
-      await fetch(`${API_URL}/expenses/${id}`, { 
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
+      await api.delete(`/expenses/${id}`);
       setExpenses(prev => prev.filter(exp => exp.id !== id));
     } catch (error) { console.error("Erro ao deletar gasto:", error); }
   };
 
   const deleteBill = async (id) => {
     try {
-      await fetch(`${API_URL}/bills/${id}`, { 
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
+      await api.delete(`/bills/${id}`);
       setBills(prev => prev.filter(bill => bill.id !== id));
     } catch (error) { console.error("Erro ao deletar conta:", error); }
   };
 
   const deleteInvestment = async (id) => {
     try {
-      await fetch(`${API_URL}/investments/${id}`, { 
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
+      await api.delete(`/investments/${id}`);
       setInvestments(prev => prev.filter(inv => inv.id !== id));
     } catch (error) { console.error("Erro ao deletar investimento:", error); }
   };
 
-  // --- FILTROS ---
   const filteredExpenses = expenses.filter(expense => {
     if (!expense.date) return false;
     const [year, month] = expense.date.split('-');
@@ -244,7 +175,6 @@ function Dashboard() {
       <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-          {/* Coluna 1 */}
           <div className="col-span-1 flex flex-col gap-6">
             <Header selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
             <Income onSetIncome={handleSetIncome} />
@@ -253,7 +183,6 @@ function Dashboard() {
             />
           </div>
 
-          {/* Coluna 2 */}
           <div className="col-span-1 flex flex-col gap-6">
             <FinanceChart 
               income={income} expenses={filteredExpenses} bills={bills} investments={filteredInvestments} selectedMonth={selectedMonth} selectedYear={selectedYear} 
@@ -263,7 +192,6 @@ function Dashboard() {
             />
           </div>
 
-          {/* Coluna 3 */}
           <div className="col-span-1 flex flex-col gap-6">
             <Bills 
               bills={bills} 
