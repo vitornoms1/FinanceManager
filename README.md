@@ -1,7 +1,7 @@
 # 💰 Finance Manager - Full Stack SaaS
 
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-![Stack](https://img.shields.io/badge/Stack-React_|_Node_|_MySQL-blue)
+![Status](https://img.shields.io/badge/Status-Live_Demo_Available-brightgreen)
+![Infra](https://img.shields.io/badge/Strategy-Hybrid_Data_(API_|_Local)-orange)
 
 ---
 

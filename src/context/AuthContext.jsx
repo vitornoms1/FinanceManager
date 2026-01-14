@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../api/axios';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
       
       if (token) {
         try {
-          if (token !== 'mock-token-recrutador') {
+          if (token !== 'mock-token-recrutador' && api.defaults?.headers?.common) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           }
           
@@ -27,7 +27,8 @@ export function AuthProvider({ children }) {
         } catch (err) {
           console.error("Token inválido ou expirado.");
           localStorage.removeItem('token');
-          if (api.defaults.headers.common['Authorization']) {
+          
+          if (api.defaults?.headers?.common?.['Authorization']) {
             delete api.defaults.headers.common['Authorization'];
           }
           setUser(null);
@@ -48,7 +49,7 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem('token', token);
       
-      if (token !== 'mock-token-recrutador') {
+      if (token !== 'mock-token-recrutador' && api.defaults?.headers?.common) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       
@@ -70,9 +71,11 @@ export function AuthProvider({ children }) {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-      if (token !== 'mock-token-recrutador') {
+      
+      if (token !== 'mock-token-recrutador' && api.defaults?.headers?.common) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
+      
       setUser(user);
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Erro ao registrar.';
@@ -86,7 +89,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    if (api.defaults.headers.common['Authorization']) {
+    
+    if (api.defaults?.headers?.common?.['Authorization']) {
         delete api.defaults.headers.common['Authorization'];
     }
   };
