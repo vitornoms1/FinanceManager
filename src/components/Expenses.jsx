@@ -144,10 +144,12 @@ function Expenses({ expenses, onAddExpense, onDeleteExpense, onEditExpense }) {
       <div className="flex-1 overflow-y-auto">
         <ul className="space-y-2">
           {expenses.length === 0 ? (
-            <div className="flex flex-col items-center text-center text-gray-400 py-6">
-              <HiOutlineDocumentText className="w-12 h-12 mb-2" />
-              <p className="font-medium">{t.noExp}</p>
-              <p className="text-sm">{t.addExpMsg}</p>
+            <div className="flex flex-col items-center justify-center py-10 text-center opacity-40">
+              <svg className="w-16 h-16 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <p className="text-sm font-bold text-gray-500">{t.noExp}</p>
+              <p className="text-xs text-gray-400 mt-1">{t.addExpMsg}</p>
             </div>
           ) : (
             expenses.map(exp => {

@@ -240,37 +240,31 @@ function Dashboard() {
   });
 
   return (
-    <div className="bg-slate-100 min-h-screen lg:h-screen w-full flex flex-col lg:overflow-hidden">
-      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto lg:overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-full lg:min-h-0">
+    <div className="bg-slate-100 min-h-screen w-full flex flex-col">
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
           {/* Coluna 1 */}
-          <div className="col-span-1 flex flex-col gap-6 h-auto lg:h-full lg:min-h-0 lg:overflow-hidden">
-            <div className="shrink-0">
-              <Header selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
-            </div>
-            <div className="shrink-0">
-              <Income onSetIncome={handleSetIncome} />
-            </div>
+          <div className="col-span-1 flex flex-col gap-6">
+            <Header selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
+            <Income onSetIncome={handleSetIncome} />
             <Investments 
               investments={investments} onAddInvestment={addInvestment} onDeleteInvestment={deleteInvestment} onEditInvestment={editInvestment}
             />
           </div>
 
           {/* Coluna 2 */}
-          <div className="col-span-1 flex flex-col gap-6 h-auto lg:h-full lg:min-h-0 lg:overflow-hidden">
-            <div className="shrink-0">
-              <FinanceChart 
-                income={income} expenses={filteredExpenses} bills={bills} investments={filteredInvestments} selectedMonth={selectedMonth} selectedYear={selectedYear} 
-              />
-            </div>
+          <div className="col-span-1 flex flex-col gap-6">
+            <FinanceChart 
+              income={income} expenses={filteredExpenses} bills={bills} investments={filteredInvestments} selectedMonth={selectedMonth} selectedYear={selectedYear} 
+            />
             <Expenses 
               expenses={filteredExpenses} onAddExpense={addExpense} onDeleteExpense={deleteExpense} onEditExpense={editExpense} 
             />
           </div>
 
           {/* Coluna 3 */}
-          <div className="col-span-1 flex flex-col gap-6 h-auto lg:h-full lg:min-h-0 lg:overflow-hidden">
+          <div className="col-span-1 flex flex-col gap-6">
             <Bills 
               bills={bills} 
               onAddBill={addBill} 

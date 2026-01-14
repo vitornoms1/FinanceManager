@@ -27,7 +27,7 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(null, true);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -107,23 +107,19 @@ app.get('/install', (req, res) => {
     )`
   ];
 
-  let successCount = 0;
+  let completed = 0;
   let errors = [];
 
-  tableQueries.forEach((query, index) => {
+  tableQueries.forEach((query) => {
     db.query(query, (err) => {
-      if (err) {
-        errors.push(err.message);
-      } else {
-        successCount++;
-      }
+      if (err) errors.push(err.message);
+      completed++;
       
-      if (index === tableQueries.length - 1) {
+      if (completed === tableQueries.length) {
         if (errors.length > 0) {
-           res.status(500).json({ message: "Erros na instalação", errors });
-        } else {
-           res.send(`✅ Instalação concluída! ${successCount} tabelas verificadas.`);
+          return res.status(500).json({ message: "Erros na instalação", errors });
         }
+        res.send(`✅ Instalação concluída com sucesso!`);
       }
     });
   });
