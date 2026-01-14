@@ -34,7 +34,8 @@ function Dashboard() {
   const fetchExpenses = async () => {
     try {
       const res = await api.get('/expenses');
-      const formattedData = res.data.map(item => ({ ...item, amount: Number(item.amount) }));
+      const data = res.data;
+      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
       setExpenses(formattedData);
     } catch (error) { console.error("Erro ao buscar gastos:", error); }
   };
@@ -42,7 +43,8 @@ function Dashboard() {
   const fetchBills = async () => {
     try {
       const res = await api.get('/bills');
-      const formattedData = res.data.map(item => ({
+      const data = res.data;
+      const formattedData = data.map(item => ({
         ...item,
         totalAmount: Number(item.totalAmount),
         lastPaymentDate: item.lastPaymentDate
@@ -54,16 +56,17 @@ function Dashboard() {
   const fetchInvestments = async () => {
     try {
       const res = await api.get('/investments');
-      const formattedData = res.data.map(item => ({ ...item, amount: Number(item.amount) }));
+      const data = res.data;
+      const formattedData = data.map(item => ({ ...item, amount: Number(item.amount) }));
       setInvestments(formattedData);
     } catch (error) { console.error("Erro ao buscar investimentos:", error); }
   };
 
   const fetchIncome = async () => {
     try {
-      // Passando os parâmetros de mês e ano para a API
       const res = await api.get(`/incomes?month=${selectedMonth}&year=${selectedYear}`);
-      setIncome(Number(res.data.amount || 0));
+      const data = res.data;
+      setIncome(Number(data.amount || 0));
     } catch (error) { console.error("Erro ao buscar renda:", error); }
   };
 
@@ -122,6 +125,7 @@ function Dashboard() {
   const payBillInstallment = async (id) => {
     try {
       const paymentDate = new Date(selectedYear, selectedMonth, 10);
+      // Alterado para api.patch para que o mockApi reconheça a função no deploy
       const res = await api.patch(`/bills/${id}/pay`, { date: paymentDate.toISOString() });
       
       const updatedBill = res.data;
@@ -158,6 +162,7 @@ function Dashboard() {
     } catch (error) { console.error("Erro ao deletar investimento:", error); }
   };
 
+  // --- FILTROS ---
   const filteredExpenses = expenses.filter(expense => {
     if (!expense.date) return false;
     const [year, month] = expense.date.split('-');
